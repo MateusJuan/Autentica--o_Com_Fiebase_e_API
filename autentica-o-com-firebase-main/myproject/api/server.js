@@ -4,7 +4,7 @@ import { JSONFile } from "lowdb/node";
 import cors from "cors";
 
 const app = express();
-const PORT = 3000;
+const PORT = 3001;
 
 // Configurações
 app.use(cors());

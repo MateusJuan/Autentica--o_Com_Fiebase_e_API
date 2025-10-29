@@ -15,7 +15,7 @@ import app from "../firebase/firebaseCon";
 import { getAuth, signOut } from "firebase/auth";
 import { MaterialIcons } from "@expo/vector-icons";
 
-const API_URL = "http://localhost:3000/api/contatos";
+const API_URL = "http://localhost:3001/api/contatos";
 
 export default function ListaContatos({ navigation }) {
   const [contatos, setContatos] = useState([]);
@@ -26,6 +26,19 @@ export default function ListaContatos({ navigation }) {
   useEffect(() => {
     buscrarContatos();
   }, []);
+
+  async function buscrarContatos() {
+    try {
+      setCarregando(true);
+      const resposta = await fetch(API_URL);
+      const data = await resposta.json();
+      setContatos(data);
+    } catch (error) {
+      console.error("Erro", "Não foi possível carregar os contatos.");
+    } finally {
+      setCarregando(false);
+    }
+  }
 
   return(
     <SafeAreaView style={styles.container}>
@@ -43,7 +56,7 @@ export default function ListaContatos({ navigation }) {
         <TouchableOpacity key={contato.id} onPress={() => navigation.navigate('EditarContato', { contatoId: contato.id })}>
           <View key={contato.id} style={styles.contatoContainer}>
             <Text style={styles.nome}>{contato.nome}</Text>
-            <Text style={styles.telefone}>{contato.telefone}</Text>
+            <Text style={styles.telefone}>{contato.numero}</Text>
           </View>
         </TouchableOpacity>
       ))}

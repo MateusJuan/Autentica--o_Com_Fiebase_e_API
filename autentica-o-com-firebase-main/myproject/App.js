@@ -28,7 +28,7 @@ export default function App(){
           component={ListaContatos}
           options={{headerShown: false}}
         />
-        {/* <Stack.Screen
+        <Stack.Screen
           name="EditarContato"
           component={EditarContato}
           options={{headerShown: false}}
@@ -37,7 +37,7 @@ export default function App(){
           name="CriarContato"
           component={CriarContato}
           options={{headerShown: false}}
-        /> */}
+        />
       </Stack.Navigator>
     </NavigationContainer>
   )
