@@ -11,13 +11,11 @@ import {
 } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
 
-const API_URL = "http://localhost:3001/api/contatos";
+const API_URL = "http://localhost:3001/api/contatos"; // 🔹 Use seu IP local se estiver testando fora do PC
 
 export default function ListaContatos({ navigation }) {
   const [contatos, setContatos] = useState([]);
   const [carregando, setCarregando] = useState(true);
-
-  // Estado para o modal
   const [modalVisible, setModalVisible] = useState(false);
   const [contatoSelecionado, setContatoSelecionado] = useState(null);
 
@@ -29,6 +27,7 @@ export default function ListaContatos({ navigation }) {
     try {
       setCarregando(true);
       const resposta = await fetch(API_URL);
+      if (!resposta.ok) throw new Error("Erro ao buscar contatos");
       const data = await resposta.json();
       setContatos(data);
     } catch (error) {
@@ -39,41 +38,43 @@ export default function ListaContatos({ navigation }) {
     }
   }
 
-      async function excluirContato(id) {
-      Alert.alert(
-        "Excluir contato",
-        "Tem certeza que deseja excluir este contato?",
-        [
-          { text: "Cancelar", style: "cancel" },
-          {
-            text: "Excluir",
-            onPress: async () => {
-              try {
-                const url = `${API_URL}/${id}`;
-                console.log("➡️ Deletando contato na URL:", url);
+  async function excluirContato(id) {
+    Alert.alert(
+      "Excluir contato",
+      "Tem certeza que deseja excluir este contato?",
+      [
+        { text: "Cancelar", style: "cancel" },
+        {
+          text: "Excluir",
+          style: "destructive",
+          onPress: async () => {
+            try {
+              const url = `${API_URL}/${id}`;
+              console.log("➡️ Deletando contato na URL:", url);
 
-                const resposta = await fetch(url, { method: "DELETE" });
+              const resposta = await fetch(url, { method: "DELETE" });
 
-                if (!resposta.ok) {
-                  console.log("❌ Erro HTTP:", resposta.status);
-                  const erro = await resposta.text();
-                  console.log("⚠️ Resposta do servidor:", erro);
-                  throw new Error(`Erro ao excluir contato: ${resposta.status}`);
-                }
-
-                Alert.alert("Sucesso", "Contato excluído com sucesso!");
-                setModalVisible(false);
-                buscarContatos(); // atualiza lista
-              } catch (error) {
-                console.error("❌ Erro ao excluir:", error);
-                Alert.alert("Erro", "Não foi possível excluir o contato. Verifique o console.");
+              if (!resposta.ok) {
+                const erroTexto = await resposta.text();
+                console.log("❌ Erro HTTP:", resposta.status, erroTexto);
+                throw new Error(`Erro ao excluir contato: ${resposta.status}`);
               }
-            },
-            style: "destructive",
+
+              Alert.alert("Sucesso", "Contato excluído com sucesso!");
+              setModalVisible(false);
+              buscarContatos(); // Atualiza a lista
+            } catch (error) {
+              console.error("❌ Erro ao excluir:", error);
+              Alert.alert(
+                "Erro",
+                "Não foi possível excluir o contato. Verifique se o servidor está rodando."
+              );
+            }
           },
-        ]
-      );
-    }
+        },
+      ]
+    );
+  }
 
   function abrirModal(contato) {
     setContatoSelecionado(contato);
@@ -95,7 +96,9 @@ export default function ListaContatos({ navigation }) {
       {carregando ? (
         <ActivityIndicator size="large" color="#0080ff" style={{ marginTop: 20 }} />
       ) : contatos.length === 0 ? (
-        <Text style={{ textAlign: "center", marginTop: 40 }}>Nenhum contato encontrado.</Text>
+        <Text style={{ textAlign: "center", marginTop: 40 }}>
+          Nenhum contato encontrado.
+        </Text>
       ) : (
         contatos.map((contato) => (
           <TouchableOpacity key={contato.id} onPress={() => abrirModal(contato)}>
