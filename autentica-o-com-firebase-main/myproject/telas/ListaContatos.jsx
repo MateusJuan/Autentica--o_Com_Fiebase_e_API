@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { 
     SafeAreaView, 
     StyleSheet, 
@@ -15,28 +15,37 @@ import app from "../firebase/firebaseCon";
 import { getAuth, signOut } from "firebase/auth";
 import { MaterialIcons } from "@expo/vector-icons";
 
+const API_URL = "http://localhost:3000/api/contatos";
+
 export default function ListaContatos({ navigation }) {
-  const [contatos, setContatos] = useState([
-    { id: '1', nome: 'João Silva', telefone: '(11) 91234-5678' },
-    { id: '2', nome: 'Maria Oliveira', telefone: '(21) 92345-6789' },
-    { id: '3', nome: 'Carlos Souza', telefone: '(31) 93456-7890' },
-  ]);
+  const [contatos, setContatos] = useState([]);
+
+  const [carregando, setCarregando] = useState(true);
+
+  // Função para buscar contatos da API
+  useEffect(() => {
+    buscrarContatos();
+  }, []);
 
   return(
     <SafeAreaView style={styles.container}>
-        <View style={{alignItems: 'center', marginBottom: 20, backgroundColor: '#0080ff'}}>
+        <View style={{alignItems: 'center', marginBottom:20, backgroundColor: '#0080ff'}}>
             <Text style={styles.titulo}>Lista de Contatos</Text>
-            <MaterialIcons 
+              <TouchableOpacity style={{position: 'absolute', right: 20, top: 10, margin:8}} onPress={() => navigation.navigate('CriarContato')}>
+                <MaterialIcons 
                 name="add" 
                 size={40} 
                 color="#ffffff" 
-            />
+                />
+              </TouchableOpacity>
         </View>
       {contatos.map((contato) => (
-        <View key={contato.id} style={styles.contatoContainer}>
-          <Text style={styles.nome}>{contato.nome}</Text>
-          <Text style={styles.telefone}>{contato.telefone}</Text>
-        </View>
+        <TouchableOpacity key={contato.id} onPress={() => navigation.navigate('EditarContato', { contatoId: contato.id })}>
+          <View key={contato.id} style={styles.contatoContainer}>
+            <Text style={styles.nome}>{contato.nome}</Text>
+            <Text style={styles.telefone}>{contato.telefone}</Text>
+          </View>
+        </TouchableOpacity>
       ))}
     </SafeAreaView>
   );
@@ -52,7 +61,7 @@ const styles = StyleSheet.create({
     titulo: {
     fontSize: 24,
     fontWeight: 'bold',
-    marginBottom: 20,
+    margin: 20,
     textAlign: 'center',
     color: '#ffffffff',
     },
