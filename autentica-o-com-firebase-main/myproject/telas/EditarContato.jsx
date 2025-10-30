@@ -50,6 +50,9 @@ export default function EditarContato({ route, navigation }) {
     return(
         <SafeAreaView style={styles.container}>
             <View style={{alignItems: 'center', marginBottom:20, backgroundColor: '#0080ff'}}>
+                <TouchableOpacity onPress={() => navigation.goBack()} style={{ position: "absolute", left: 20, top: 10, margin: 8 }}>
+                    <MaterialIcons name="arrow-back" size={40} color="#ffffff" />
+                </TouchableOpacity>
                 <Text style={styles.titulo}>Editar Contato</Text>
             </View>
 

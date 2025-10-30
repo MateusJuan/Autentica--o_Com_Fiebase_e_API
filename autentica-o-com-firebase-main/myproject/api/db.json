@@ -1,28 +1,10 @@
 {
   "contatos": [
     {
-      "id": 1761749832571,
-      "nome": "eliel",
-      "email": "eptj@gmail.com",
+      "id": 1761821079809,
+      "nome": "Eliel",
+      "email": "eptj@discente.ifpe.edu.br",
       "numero": "40028922"
-    },
-    {
-      "id": 1761750459528,
-      "nome": "sarinha",
-      "email": "blabla@gmail",
-      "numero": "54545454"
-    },
-    {
-      "id": 1761750626275,
-      "nome": "chato",
-      "email": "kakaka",
-      "numero": "123456"
-    },
-    {
-      "id": 1761751020486,
-      "nome": "miguel",
-      "email": "gagaag@gmail.com",
-      "numero": "121212"
     }
   ]
 }

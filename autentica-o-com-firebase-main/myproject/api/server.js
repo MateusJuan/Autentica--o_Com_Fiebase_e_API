@@ -67,7 +67,7 @@ app.delete("/api/contatos/:id", async (req, res) => {
   const { id } = req.params;
   await db.read();
 
-  db.data.contatos = db.data.contatos.filter((c) => c.id != id);
+  db.data.contatos = db.data.contatos.filter((c) => c.id !== Number(id));
   await db.write();
 
   res.json({ message: "Contato removido com sucesso." });

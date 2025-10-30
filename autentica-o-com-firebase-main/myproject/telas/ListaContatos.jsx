@@ -10,6 +10,7 @@ import {
   ActivityIndicator 
 } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
+import axios from "axios";
 
 const API_URL = "http://localhost:3001/api/contatos"; // 🔹 Use seu IP local se estiver testando fora do PC
 
@@ -18,6 +19,8 @@ export default function ListaContatos({ navigation }) {
   const [carregando, setCarregando] = useState(true);
   const [modalVisible, setModalVisible] = useState(false);
   const [contatoSelecionado, setContatoSelecionado] = useState(null);
+  const [confirmarExcluir, setConfirmarExcluir] = useState(false);
+
 
   useEffect(() => {
     buscarContatos();
@@ -39,41 +42,26 @@ export default function ListaContatos({ navigation }) {
   }
 
   async function excluirContato(id) {
-    Alert.alert(
-      "Excluir contato",
-      "Tem certeza que deseja excluir este contato?",
-      [
-        { text: "Cancelar", style: "cancel" },
-        {
-          text: "Excluir",
-          style: "destructive",
-          onPress: async () => {
-            try {
-              const url = `${API_URL}/${id}`;
-              console.log("➡️ Deletando contato na URL:", url);
+    Alert.alert("Excluir contato", "Tem certeza que deseja excluir este contato?", [
+      { text: "Cancelar", style: "cancel" },
+      {
+        text: "Excluir",
+        style: "destructive",
+        onPress: async () => {
+          try {
+            await axios.delete(`${API_URL}/${contatoSelecionado.id}`);
+            // Remove do estado local também:
+            setContatos((prev) => prev.filter((c) => c.id !== id));
 
-              const resposta = await fetch(url, { method: "DELETE" });
-
-              if (!resposta.ok) {
-                const erroTexto = await resposta.text();
-                console.log("❌ Erro HTTP:", resposta.status, erroTexto);
-                throw new Error(`Erro ao excluir contato: ${resposta.status}`);
-              }
-
-              Alert.alert("Sucesso", "Contato excluído com sucesso!");
-              setModalVisible(false);
-              buscarContatos(); // Atualiza a lista
-            } catch (error) {
-              console.error("❌ Erro ao excluir:", error);
-              Alert.alert(
-                "Erro",
-                "Não foi possível excluir o contato. Verifique se o servidor está rodando."
-              );
-            }
-          },
+            Alert.alert("Sucesso", "Contato excluído com sucesso!");
+            setModalVisible(false);
+          } catch (error) {
+            console.error(error);
+            Alert.alert("Erro", "Não foi possível excluir o contato.");
+          }
         },
-      ]
-    );
+      },
+    ]);
   }
 
   function abrirModal(contato) {
@@ -139,10 +127,10 @@ export default function ListaContatos({ navigation }) {
               <Text style={styles.textoBotao}>Editar</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity
-              style={[styles.botao, { backgroundColor: "red" }]}
-              onPress={() => excluirContato(contatoSelecionado.id)}
-            >
+              <TouchableOpacity
+                style={[styles.botao, { backgroundColor: "red" }]}
+                onPress={() => setConfirmarExcluir(true)}
+              >
               <Text style={styles.textoBotao}>Excluir</Text>
             </TouchableOpacity>
 
@@ -152,6 +140,55 @@ export default function ListaContatos({ navigation }) {
           </View>
         </View>
       </Modal>
+
+      {/* MODAL EXCLUIR */}
+      <Modal visible={confirmarExcluir} transparent animationType="fade">
+      <View style={styles.modalBackground}>
+        <View style={styles.modalContainer}>
+          <Text style={styles.modalTitle}>Excluir Contato</Text>
+
+          {contatoSelecionado && (
+            <Text style={{ textAlign: "center", marginBottom: 20 }}>
+              Tem certeza que deseja excluir{" "}
+              <Text style={{ fontWeight: "bold" }}>{contatoSelecionado.nome}</Text>?{"\n"}
+              Esta ação não poderá ser desfeita.
+            </Text>
+          )}
+
+          <View style={styles.modalButtons}>
+            <TouchableOpacity
+              style={[styles.modalButton, { backgroundColor: "#a32e2e" }]}
+              onPress={async () => {
+                try {
+                  await axios.delete(`${API_URL}/${contatoSelecionado.id}`);
+
+                  // Remove do estado local para atualizar a lista
+                  setContatos((prev) =>
+                    prev.filter((c) => c.id !== contatoSelecionado.id)
+                  );
+
+                  setConfirmarExcluir(false);
+                  setModalVisible(false);
+                  Alert.alert("Sucesso", "Contato excluído com sucesso!");
+                } catch (error) {
+                  console.error(error);
+                  Alert.alert("Erro", "Erro ao excluir contato. Tente novamente.");
+                }
+              }}
+            >
+              <Text style={styles.modalButtonText}>Excluir</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={[styles.modalButton, { backgroundColor: "#999" }]}
+              onPress={() => setConfirmarExcluir(false)}
+            >
+              <Text style={styles.modalButtonText}>Cancelar</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </View>
+    </Modal>
     </SafeAreaView>
   );
 }
@@ -238,4 +275,39 @@ const styles = StyleSheet.create({
     fontSize: 16,
     marginTop: 10,
   },
+  modalBackground: {
+  flex: 1,
+  backgroundColor: "rgba(0,0,0,0.5)",
+  justifyContent: "center",
+  alignItems: "center",
+},
+modalContainer: {
+  backgroundColor: "#fff",
+  width: "80%",
+  borderRadius: 12,
+  padding: 20,
+  alignItems: "center",
+},
+modalTitle: {
+  fontSize: 20,
+  fontWeight: "bold",
+  marginBottom: 10,
+},
+modalButtons: {
+  flexDirection: "row",
+  justifyContent: "space-between",
+  width: "100%",
+},
+modalButton: {
+  flex: 1,
+  padding: 12,
+  borderRadius: 8,
+  alignItems: "center",
+  marginHorizontal: 5,
+},
+modalButtonText: {
+  color: "#fff",
+  fontSize: 16,
+  fontWeight: "bold",
+},
 });
